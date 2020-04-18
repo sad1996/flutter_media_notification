@@ -4,35 +4,36 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 class MediaNotification {
-  static const MethodChannel _channel = const MethodChannel('media_notification');
-  static Map<String, Function> _listeners = new Map();
+  static const MethodChannel _channel = MethodChannel('media_notification');
+  static final Map<String, Function> _listeners = Map();
   
-  static Future<dynamic> _myUtilsHandler(MethodCall methodCall) async {
+  Future<dynamic> _myUtilsHandler(MethodCall methodCall) async {
     // Вызываем слушателя события
-    _listeners.forEach((event, callback) {
+    _listeners.forEach((String event, Function callback) {
       if (methodCall.method == event) {
         callback();
         return true;
       }
+      return null;
     });
   }
 
-  static Future show({@required title, @required author, play = true}) async {
+  Future show({@required String title, @required String author, bool play = true}) async {
     final Map<String, dynamic> params = <String, dynamic>{
       'title': title,
       'author': author,
       'play': play
     };
-    await _channel.invokeMethod('show', params);
+    await _channel.invokeMethod<Null>('show', params);
 
     _channel.setMethodCallHandler(_myUtilsHandler);
   }
 
-  static Future hide() async {
-    await _channel.invokeMethod('hide');
+  Future hide() async {
+    await _channel.invokeMethod<Null>('hide');
   }
 
-  static setListener(String event, Function callback) {
+  void setListener(String event, Function callback) {
     _listeners.addAll({event: callback});
   } 
 }
